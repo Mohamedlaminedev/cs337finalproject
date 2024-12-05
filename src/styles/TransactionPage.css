@@ -1,0 +1,58 @@
+.transaction-page {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+form {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+select, input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.transactions-list {
+    margin-top: 30px;
+}
+
+.transaction-item {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    align-items: center;
+}
+
+.type {
+    text-transform: capitalize;
+    font-weight: bold;
+}
+
+.type.expense {
+    color: #dc3545;
+}
+
+.type.income {
+    color: #28a745;
+}
+
+.amount {
+    font-weight: bold;
+}
