@@ -1,39 +1,99 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import React, { useState } from 'react';
+import { api } from './services/api';
 import Navigation from './components/Navigation';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import TransactionPage from './pages/TransactionPage';
 import HelpPage from './pages/HelpPage';
 import './App.css';
-import './styles/Login.css';
-import './styles/Navigation.css';
-import './styles/Dashboard.css';
-import './styles/TransactionPage.css';
-import './styles/HelpPage.css';
 
-function AppContent() {
-    const location = useLocation();
-    const isLoginPage = location.pathname === '/';
+function App() {
+    const [currentPage, setCurrentPage] = useState('login');
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [userData, setUserData] = useState({
+        username: '',
+        budget: 0,
+        balance: 0,
+        transactions: []
+    });
+
+    const handleLogin = async (username, initialBalance, isSignup) => {
+        try {
+            let response;
+            if (isSignup) {
+                response = await api.signup(username, initialBalance);
+            } else {
+                response = await api.login(username);
+            }
+            
+            setUserData(response);
+            setIsLoggedIn(true);
+            setCurrentPage('dashboard');
+        } catch (error) {
+            console.error('Login failed:', error);
+        }
+    };
+
+    const handleAddTransaction = async (transaction) => {
+        try {
+            const response = await api.addTransaction(userData.id, transaction);
+            setUserData(response); // Update user data with new transaction
+        } catch (error) {
+            console.error('Failed to add transaction:', error);
+        }
+    };
+
+    const handleLogout = () => {
+        setIsLoggedIn(false);
+        setCurrentPage('login');
+        setUserData({
+            username: '',
+            budget: 0,
+            balance: 0,
+            transactions: []
+        });
+    };
+
+    const renderPage = () => {
+        switch(currentPage) {
+            case 'login':
+                return <Login onLogin={handleLogin} />;
+            case 'dashboard':
+                return <Dashboard 
+                    userData={{
+                        ...userData,
+                        spendingData: userData.transactions
+                            .filter(t => t.type === 'expense')
+                            .reduce((acc, t) => {
+                                acc[t.category] = (acc[t.category] || 0) + t.amount;
+                                return acc;
+                            }, {})
+                    }} 
+                />;
+            case 'transactions':
+                return <TransactionPage 
+                    transactions={userData.transactions}
+                    onAddTransaction={handleAddTransaction}
+                    currentBalance={userData.balance}
+                />;
+            case 'help':
+                return <HelpPage />;
+            default:
+                return <Login onLogin={handleLogin} />;
+        }
+    };
 
     return (
         <div className="App">
-            {!isLoginPage && <Navigation />}
-            <Routes>
-                <Route path="/" element={<Login />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/transactions" element={<TransactionPage />} />
-                <Route path="/help" element={<HelpPage />} />
-            </Routes>
+            {isLoggedIn && (
+                <Navigation 
+                    currentPage={currentPage}
+                    onNavigate={setCurrentPage}
+                    onLogout={handleLogout}
+                />
+            )}
+            {renderPage()}
         </div>
-    );
-}
-
-function App() {
-    return (
-        <Router>
-            <AppContent />
-        </Router>
     );
 }
 

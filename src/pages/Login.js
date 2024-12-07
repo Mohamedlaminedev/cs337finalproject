@@ -1,96 +1,74 @@
+// Login.js
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import '../styles/Login.css';
 
-function Login() {
-    const navigate = useNavigate();
-    const [isLogin, setIsLogin] = useState(true);
-    const [username, setUsername] = useState('');
-    const [budget, setBudget] = useState('');
-    const [error, setError] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const [message, setMessage] = useState('');
 
-    const validateForm = () => {
-        if (username.trim() === '') {
-            setError('Username is required');
-            return false;
-        }
-        if (!isLogin && (budget <= 0 || budget === '')) {
-            setError('Please enter a valid budget amount');
-            return false;
-        }
-        setError('');
-        return true;
-    };
+function Login({ onLogin }) {
+    const [isSignup, setIsSignup] = useState(false);
+    const [username, setUsername] = useState('');
+    const [initialBalance, setInitialBalance] = useState('');
+    const [error, setError] = useState('');
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!validateForm()) return;
-
-        setIsLoading(true);
-        setMessage('');
         
+        if (!username.trim()) {
+            setError('Username is required');
+            return;
+        }
+
+        if (isSignup && (!initialBalance || initialBalance <= 0)) {
+            setError('Please enter a valid initial balance');
+            return;
+        }
+
         try {
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            setMessage('Success!');
-            navigate('/dashboard');
-        } catch (err) {
-            setError('Something went wrong. Please try again.');
-        } finally {
-            setIsLoading(false);
+            await onLogin(username, parseFloat(initialBalance), isSignup);
+        } catch (error) {
+            setError(error.message);
         }
     };
 
+
+
+
     return (
         <div className="login-container">
-            <div className="login-content">
-                <h1>Welcome to Budget Tracker</h1>
-                <p className="welcome-text">
-                    {isLogin ? 'Welcome Back!' : 'Start Your Budget Journey'}
-                </p>
+            <h2>{isSignup ? 'Sign Up' : 'Login'}</h2>
+            <form onSubmit={handleSubmit}>
+                {error && <div className="error">{error}</div>}
                 
-                {error && <div className="error-message">{error}</div>}
-                {message && <div className="success-message">{message}</div>}
+                <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Username"
+                    required
+                />
                 
-                <form onSubmit={handleSubmit}>
-                    <div>
-                    <input 
-                        type="text"
-                        placeholder="Username"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
+                {isSignup && (
+                    <input
+                        type="number"
+                        value={initialBalance}
+                        onChange={(e) => setInitialBalance(e.target.value)}
+                        placeholder="Initial Balance"
+                        required
                     />
-                    </div>
-                    <div>
-                    {!isLogin && (
-                        <input 
-                            type="number"
-                            placeholder="Initial Budget"
-                            value={budget}
-                            onChange={(e) => setBudget(e.target.value)}
-                        />
-                    )}
-                    </div>
+                )}
+                
+                <button type="submit">
+                    {isSignup ? 'Sign Up' : 'Login'}
+                </button>
 
-                    <button type="submit" disabled={isLoading}>
-                        {isLoading ? 'Processing...' : (isLogin ? 'Login' : 'Sign Up')}
-                    </button>
-                </form>
-
-                <p className="toggle-form">
-                    {isLogin ? "New to Budget Tracker? " : "Already tracking? "}
-                    <span onClick={() => {
-                        setIsLogin(!isLogin);
-                        setError('');
-                        setMessage('');
-                    }}>
-                        {isLogin ? 'Sign Up' : 'Login'}
-                    </span>
+                <p onClick={() => {
+                    setIsSignup(!isSignup);
+                    setError(''); // Clear any errors when switching modes
+                    setUsername(''); // Clear fields when switching modes
+                    setInitialBalance('');
+                }}>
+                    {isSignup ? 'Already have an account? Login' : 'New user? Sign up'}
                 </p>
-            </div>
+            </form>
         </div>
     );
 }

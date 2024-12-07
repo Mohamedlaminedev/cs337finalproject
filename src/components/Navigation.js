@@ -1,13 +1,15 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import '../styles/Navigation.css';
 
-function Navigation() {
+function Navigation({ onNavigate, onLogout }) {
     return (
-        <nav className="main-nav">
-            <Link to="/dashboard">Dashboard</Link>
-            <Link to="/transactions">Transactions</Link>
-            <Link to="/help">Help</Link>
+        <nav className="navigation">
+            <ul>
+                <li onClick={() => onNavigate('dashboard')}>Dashboard</li>
+                <li onClick={() => onNavigate('transactions')}>Transactions</li>
+                <li onClick={() => onNavigate('help')}>Help</li>
+                <li onClick={onLogout}>Logout</li>
+            </ul>
         </nav>
     );
 }
