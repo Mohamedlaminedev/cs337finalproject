@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { api } from './services/api';
+import api from './services/api';
 import Navigation from './components/Navigation';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
