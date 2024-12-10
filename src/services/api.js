@@ -20,13 +20,29 @@ const api = {
   },
 
   addTransaction: async (userId, transaction) => {
-    const response = await fetch(`${API_URL}/transactions/add`, {
+    const response = await fetch(`${API_URL}/transactions/addTransactions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId, transaction }),
     });
     return response.json();
   },
+
+  leaderboard: async () => {
+    const response = await fetch(`${API_URL}/transactions/leaderboard`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return response.json();
+  },
+
+  recent: async () => {
+    const response = await fetch(`${API_URL}/transactions/recent`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    return response.json();
+  }
 };
 
 export default api;

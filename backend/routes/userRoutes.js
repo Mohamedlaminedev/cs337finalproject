@@ -60,7 +60,7 @@ router.post('/login', async (req, res) => {
             transactions: transactions.map(txn => ({
                 id: txn._id,
                 type: txn.type,
-                category: txn.category || null,
+                category: txn.category,
                 amount: txn.amount,
                 date: txn.date,
                 description: txn.description || '',

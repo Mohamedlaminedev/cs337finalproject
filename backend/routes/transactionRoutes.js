@@ -31,7 +31,7 @@ router.post('/addTransaction', async (req, res) => {
             }
 
             // Create the transfer transaction
-            newTransaction = new Transaction({ user: userId, recipient: recipient._id, amount, type, description });
+            newTransaction = new Transaction({ user: userId, recipient: recipient._id, amount, type, category, description });
             await newTransaction.save();
 
             // Update balances for both users
@@ -41,10 +41,6 @@ router.post('/addTransaction', async (req, res) => {
             await recipient.save();
         } else if (type === 'debit') {
             // Handle general expense
-            if (!category) {
-                return res.status(400).json({ message: 'Category is required for expense transactions' });
-            }
-
             newTransaction = new Transaction({ user: userId, amount, type, category, description });
             await newTransaction.save();
 
@@ -53,7 +49,7 @@ router.post('/addTransaction', async (req, res) => {
             await user.save();
         } else if (type === 'credit') {
             // Handle income (adding money to user)
-            newTransaction = new Transaction({ user: userId, amount, type, description });
+            newTransaction = new Transaction({ user: userId, amount, type, category, description });
             await newTransaction.save();
 
             // Update user's balance
@@ -71,7 +67,7 @@ router.post('/addTransaction', async (req, res) => {
             transactions: transactions.map(txn => ({
                 id: txn._id,
                 type: txn.type,
-                category: txn.category || null,
+                category: txn.category,
                 amount: txn.amount,
                 date: txn.date,
                 description: txn.description || '',
@@ -83,6 +79,51 @@ router.post('/addTransaction', async (req, res) => {
         res.status(500).json({ message: 'Error processing transaction', error });
     }
 });
+
+router.get('/leaderboard', async (req, res) => {
+    try {
+        // Fetch the top 3 users sorted by budget in descending order
+        const topUsers = await User.find()
+            .sort({ budget: -1 }) // Sort by 'budget' descending
+            .limit(3) // Limit to top 3 users
+            .select('username budget -_id'); // Select only 'username' and 'budget', exclude '_id'
+
+        return res.status(200).json(topUsers);
+    } catch (error) {
+        console.error('Error fetching leaderboard:', error);
+        return res.status(500).json({ message: 'Internal server error.' });
+    }
+});
+
+// Route to get the top 5 most recent transactions
+router.get('/recent', async (req, res) => {
+    try {
+        // Find the 5 most recent transactions sorted by date descending
+        const recentTransactions = await Transaction.find()
+            .sort({ date: -1 }) // Sort by 'date' in descending order (most recent first)
+            .limit(5) // Limit to 5 transactions
+            .populate('user recipient', 'username') // Populate user and recipient names
+            .lean(); // Convert result to plain JS objects for performance
+
+        // Format the response to include relevant fields
+        const formattedTransactions = recentTransactions.map(txn => ({
+            id: txn._id,
+            type: txn.type,
+            category: txn.category,
+            amount: txn.amount,
+            date: txn.date,
+            description: txn.description || '',
+            user: txn.user ? txn.user.username : null,
+            recipient: txn.recipient ? txn.recipient.username : null
+        }));
+
+        res.status(200).json(formattedTransactions);
+    } catch (error) {
+        console.error('Error fetching recent transactions:', error);
+        res.status(500).json({ message: 'Internal server error.', error });
+    }
+});
+
 
 // Get all transactions for a specific user
 router.get('/:userId', async (req, res) => {
@@ -97,7 +138,7 @@ router.get('/:userId', async (req, res) => {
         const formattedTransactions = transactions.map(txn => ({
             id: txn._id,
             type: txn.type,
-            category: txn.category || null, // Include category only if it exists
+            category: txn.category,
             amount: txn.amount,
             date: txn.date,
             description: txn.description || '', // Default to an empty string if description is missing
