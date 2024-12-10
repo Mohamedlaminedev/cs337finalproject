@@ -22,10 +22,8 @@ const transactionSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    enum: ['food', 'rent', 'entertainment', 'utilities', 'others'], // Predefined categories for expenses
-    required: function () {
-      return this.type === 'debit'; // Category is required only if it's an expense (debit)
-    },
+    enum: ['food', 'rent', 'entertainment', 'utilities', 'transportation', 'other'], // Predefined categories for expenses
+    required: true,
   },
   date: {
     type: Date,

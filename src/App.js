@@ -25,8 +25,14 @@ function App() {
             } else {
                 response = await api.login(username);
             }
-            
-            setUserData(response);
+
+            const parsedResponse = {
+                username: response.user.name || '',
+                budget: response.user.budget || 0,
+                balance: response.user.balance || 0,
+                transactions: response.transactions || [],
+            };
+            setUserData(parsedResponse);
             setIsLoggedIn(true);
             setCurrentPage('dashboard');
         } catch (error) {
@@ -36,6 +42,7 @@ function App() {
 
     const handleAddTransaction = async (transaction) => {
         try {
+            console.log(userData.id);
             const response = await api.addTransaction(userData.id, transaction);
             setUserData(response); // Update user data with new transaction
         } catch (error) {
@@ -55,11 +62,11 @@ function App() {
     };
 
     const renderPage = () => {
-        switch(currentPage) {
+        switch (currentPage) {
             case 'login':
                 return <Login onLogin={handleLogin} />;
             case 'dashboard':
-                return <Dashboard 
+                return <Dashboard
                     userData={{
                         ...userData,
                         spendingData: userData.transactions
@@ -68,10 +75,10 @@ function App() {
                                 acc[t.category] = (acc[t.category] || 0) + t.amount;
                                 return acc;
                             }, {})
-                    }} 
+                    }}
                 />;
             case 'transactions':
-                return <TransactionPage 
+                return <TransactionPage
                     transactions={userData.transactions}
                     onAddTransaction={handleAddTransaction}
                     currentBalance={userData.balance}
@@ -86,7 +93,7 @@ function App() {
     return (
         <div className="App">
             {isLoggedIn && (
-                <Navigation 
+                <Navigation
                     currentPage={currentPage}
                     onNavigate={setCurrentPage}
                     onLogout={handleLogout}
