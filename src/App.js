@@ -24,15 +24,16 @@ function App() {
                 response = await api.signup(username, initialBalance);
             } else {
                 response = await api.login(username);
+                console.log(response);
             }
-
             const parsedResponse = {
-                username: response.user.name || '',
-                budget: response.user.budget || 0,
-                balance: response.user.balance || 0,
+                username: response.username || '',
+                budget: response.budget || 0,
+                balance: response.balance || 0,
                 transactions: response.transactions || [],
             };
-            setUserData(parsedResponse);
+            console.log(parsedResponse);
+            setUserData(response);
             setIsLoggedIn(true);
             setCurrentPage('dashboard');
         } catch (error) {

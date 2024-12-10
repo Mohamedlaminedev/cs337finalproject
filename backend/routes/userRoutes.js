@@ -26,7 +26,7 @@ router.post('/signup', async (req, res) => {
         await newUser.save();
 
         res.status(201).json({
-            username: newUser.username,
+            name: newUser.username,
             budget: newUser.budget,
             balance: newUser.balance,
             transactions: [] // Empty transactions for a new user
@@ -54,11 +54,9 @@ router.post('/login', async (req, res) => {
 
         // Return user details along with their transaction history
         res.status(200).json({
-            user: {
-                name: user.username,
-                balance: user.balance,
-                budget: user.budget,
-            },
+            name: user.username,
+            balance: user.balance,
+            budget: user.budget,
             transactions: transactions.map(txn => ({
                 id: txn._id,
                 type: txn.type,
