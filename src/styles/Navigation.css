@@ -31,7 +31,6 @@
     background-color: #f8fafc;
 }
 
-/* Style for the logout button */
 .navigation li:last-child {
     color: #ef4444;
 }
@@ -41,7 +40,6 @@
     background-color: #ef4444;
 }
 
-/* Responsive design */
 @media (max-width: 768px) {
     .navigation {
         padding: 0.75rem 1rem;
@@ -57,7 +55,6 @@
     }
 }
 
-/* Optional: Add this if you want to style active navigation item */
 .navigation li.active {
     color: #007bff;
     background-color: #eff6ff;

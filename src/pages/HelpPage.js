@@ -10,6 +10,11 @@ function HelpPage() {
         {
             question: "How is my savings calculated?",
             answer: "Savings are calculated based on your income minus expenses over time."
+        },
+
+        {
+            question: "Want to dispute a transaction",
+            answer: <span>Call us at <strong>800-832-8367</strong></span>
         }
     ];
 

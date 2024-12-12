@@ -1,16 +1,16 @@
-// BalanceDisplay.js
 import React from 'react';
 
-function BalanceDisplay({ balance }) {
+const BalanceDisplay = ({ balance = 0 }) => {
+    const formattedBalance = Number(balance).toFixed(2);
+    
     return (
-        <div className="balance-card">
-            <h2>Current Balance</h2>
-            <div className="balance-amount">
-                ${balance.toFixed(2)} {/* Format to 2 decimal places */}
+        <div className="balance-display">
+            <h3>Current Balance</h3>
+            <div className={`amount ${Number(formattedBalance) < 0 ? 'negative' : 'positive'}`}>
+                ${formattedBalance}
             </div>
         </div>
     );
-}
+};
 
-export default BalanceDisplay
-
+export default BalanceDisplay;

@@ -1,76 +1,85 @@
 // routes/userRoutes.js
 const express = require('express');
 const User = require('../models/User');
-const Transaction = require('../models/Transaction'); // Import the Transaction model
-
 const router = express.Router();
+const Transaction = require('../models/Transaction');
 
-// Signup user route
+
+
+// Signup route
 router.post('/signup', async (req, res) => {
-    const { username, initialBalance } = req.body;
-    console.log('Request Body:', req.body); // Log incoming data
     try {
+        const { username, initialBalance } = req.body;
+        console.log('Signup request:', { username, initialBalance });
+
+        // Check for existing user
         const existingUser = await User.findOne({ username });
-        console.log('Existing User:', existingUser); // Log result of query
         if (existingUser) {
             return res.status(400).json({ message: 'Username already exists' });
         }
 
-        // Create a new user with budget and balance
-        const newUser = new User({
-            username,
-            budget: initialBalance,
-            balance: initialBalance
+        // Create new user
+        const user = new User({
+            username: username,  // Make sure this matches the schema
+            budget: Number(initialBalance),
+            balance: Number(initialBalance)
         });
 
-        await newUser.save();
+        await user.save();
 
+        // Send response with correct field names
         res.status(201).json({
-            name: newUser.username,
-            budget: newUser.budget,
-            balance: newUser.balance,
-            transactions: [] // Empty transactions for a new user
-        });
-
-    } catch (error) {
-        res.status(500).json({ message: 'Error registering user', error });
-    }
-});
-
-// Get user by username (including balance, budget, and transaction history)
-router.post('/login', async (req, res) => {
-    const { username } = req.body;
-    try {
-        // Find the user by their unique username
-        const user = await User.findOne({ username });
-        if (!user) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        // Fetch all transactions where the user is either the sender or recipient
-        const transactions = await Transaction.find({
-            $or: [{ user: user._id }, { recipient: user._id }]
-        }).populate('user recipient', 'username'); // Populate user and recipient names
-
-        // Return user details along with their transaction history
-        res.status(200).json({
-            name: user.username,
-            balance: user.balance,
+            _id: user._id.toString(),
+            username: user.username,
             budget: user.budget,
-            transactions: transactions.map(txn => ({
-                id: txn._id,
-                type: txn.type,
-                category: txn.category,
-                amount: txn.amount,
-                date: txn.date,
-                description: txn.description || '',
-                user: txn.user ? txn.user.username : null,
-                recipient: txn.recipient ? txn.recipient.username : null,
-            })),
+            balance: user.balance,
+            transactions: []
         });
+
     } catch (error) {
-        res.status(500).json({ message: 'Error retrieving user data', error });
+        console.error('Signup error:', error);
+        res.status(500).json({ message: 'Error creating user' });
     }
 });
+
+
+
+router.post('/login', async (req, res) => {
+    try {
+        const { username } = req.body;
+        const user = await User.findOne({ username });
+        
+        // Fetch the most recent transactions for this user
+        const recentTransactions = await Transaction.find({ user: user._id })
+            .sort({ date: -1 })  // Most recent first
+            .limit(3)  // Get last 3 transactions
+            .select('amount type category date description')
+            .lean();
+
+        res.status(200).json({
+            _id: user._id,
+            username: user.username,
+            budget: user.budget,
+            balance: user.balance,
+            transactions: recentTransactions  // Include transactions in login response
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Error logging in' });
+    }
+});
+
+router.get('/leaderboard', async (req, res) => {
+    try {
+        // Fetch top 5 users sorted by balance in descending order
+        const topUsers = await User.find()
+            .sort({ balance: -1 })
+            .limit(5)
+            .select('username balance');
+        res.json(topUsers);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching leaderboard', error });
+    }
+});
+
 
 module.exports = router;

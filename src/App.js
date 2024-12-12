@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from './services/api';
 import Navigation from './components/Navigation';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import TransactionPage from './pages/TransactionPage';
 import HelpPage from './pages/HelpPage';
+import Leaderboard from './pages/Leaderboard';
 import './App.css';
 
 function App() {
@@ -14,81 +15,126 @@ function App() {
         username: '',
         budget: 0,
         balance: 0,
-        transactions: []
+        transactions: [],
+        _id: null
     });
+
+    useEffect(() => {
+        const storedUserData = localStorage.getItem('userData');
+        if (storedUserData) {
+            const parsedUserData = JSON.parse(storedUserData);
+            setUserData(parsedUserData);
+            setIsLoggedIn(true);
+            setCurrentPage('dashboard');
+        }
+    }, []);
+
+    const updateUserDataAndStorage = (newData) => {
+        const updatedData = {
+            ...newData,
+            transactions: newData.transactions || []
+        };
+        localStorage.setItem('userData', JSON.stringify(updatedData));
+        setUserData(updatedData);
+    };
 
     const handleLogin = async (username, initialBalance, isSignup) => {
         try {
-            let response;
-            if (isSignup) {
-                response = await api.signup(username, initialBalance);
-            } else {
-                response = await api.login(username);
-                console.log(response);
+            const response = isSignup 
+                ? await api.signup(username, initialBalance)
+                : await api.login(username);
+
+            if (!response._id) {
+                throw new Error('Invalid response from server');
             }
-            const parsedResponse = {
-                username: response.username || '',
-                budget: response.budget || 0,
-                balance: response.balance || 0,
-                transactions: response.transactions || [],
+           
+            const newUserData = {
+                _id: response._id,
+                username: response.username,
+                budget: response.budget,
+                balance: response.balance,
+                transactions: response.transactions || []
             };
-            console.log(parsedResponse);
-            setUserData(response);
+
+            updateUserDataAndStorage(newUserData);
             setIsLoggedIn(true);
             setCurrentPage('dashboard');
+            
+            return response;
         } catch (error) {
-            console.error('Login failed:', error);
+            throw new Error('Username not found');
         }
     };
 
     const handleAddTransaction = async (transaction) => {
+        const userId = userData._id;
+        if (!userId) throw new Error('User ID not found');
+
         try {
-            console.log(userData.id);
-            const response = await api.addTransaction(userData.id, transaction);
-            setUserData(response); // Update user data with new transaction
+            const response = await api.addTransaction(userId, {
+                ...transaction,
+                amount: Number(transaction.amount),
+                userId: userId,
+                incomeSource: transaction.incomeSource
+            });
+
+            const updatedUserData = {
+                ...userData,
+                balance: response.balance,
+                transactions: response.transactions || []
+            };
+
+            updateUserDataAndStorage(updatedUserData);
+            return response;
         } catch (error) {
-            console.error('Failed to add transaction:', error);
+            console.error('Transaction failed:', error);
+            throw error;
         }
     };
 
     const handleLogout = () => {
+        localStorage.removeItem('userData');
         setIsLoggedIn(false);
         setCurrentPage('login');
+        localStorage.removeItem('dashboardViewMode'); 
         setUserData({
             username: '',
             budget: 0,
             balance: 0,
-            transactions: []
+            transactions: [],
+            _id: null
         });
     };
 
     const renderPage = () => {
-        switch (currentPage) {
-            case 'login':
-                return <Login onLogin={handleLogin} />;
-            case 'dashboard':
-                return <Dashboard
+        const pages = {
+            login: <Login onLogin={handleLogin} />,
+            leaderboard: <Leaderboard />,
+            dashboard: (
+                <Dashboard
                     userData={{
                         ...userData,
                         spendingData: userData.transactions
-                            .filter(t => t.type === 'expense')
+                            .filter(t => t.type === 'debit')
                             .reduce((acc, t) => {
                                 acc[t.category] = (acc[t.category] || 0) + t.amount;
                                 return acc;
                             }, {})
                     }}
-                />;
-            case 'transactions':
-                return <TransactionPage
+                />
+            ),
+            transactions: (
+                <TransactionPage
                     transactions={userData.transactions}
                     onAddTransaction={handleAddTransaction}
                     currentBalance={userData.balance}
-                />;
-            case 'help':
-                return <HelpPage />;
-            default:
-                return <Login onLogin={handleLogin} />;
-        }
+                    userData={userData}
+                />
+            ),
+            help: <HelpPage />
+        };
+
+        return pages[currentPage] || pages.login;
     };
 
     return (

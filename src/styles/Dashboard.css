@@ -4,6 +4,42 @@
     padding: 20px;
 }
 
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.transaction-buttons {
+    display: flex;
+    gap: 15px;
+}
+
+.view-recent-btn, .view-all-btn {
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.view-recent-btn {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.view-all-btn {
+    background-color: #2196F3;
+    color: white;
+}
+
+.view-recent-btn:hover, .view-all-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
 .dashboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));

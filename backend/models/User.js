@@ -1,22 +1,28 @@
-// models/User.js
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-  username: {
-    type: String,
-    required: true,
-    unique: true // Ensure username is unique
-  },
-  budget: {
-    type: Number,
-    required: true,
-    default: 0.0 // Default balance to 0.0
-  },
-  balance: {
-    type: Number,
-    required: true,
-    default: 0.0 // Default savings to 0.0
-  }
+    username: {  
+        type: String,
+        required: true,
+        unique: true,
+        trim: true
+    },
+    balance: {
+        type: Number,
+        default: 0
+    },
+    budget: {
+        type: Number,
+        default: 0
+    }
+}, { timestamps: true });
+
+userSchema.set('toJSON', {
+    virtuals: true,
+    transform: function(doc, ret) {
+        ret._id = ret._id.toString();
+        return ret;
+    }
 });
 
 module.exports = mongoose.model('User', userSchema);
