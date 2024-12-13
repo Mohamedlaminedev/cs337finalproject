@@ -6,10 +6,12 @@ const transactionSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User', // Reference to the User model who initiates the transaction
     required: true,
+
   },
   recipient: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User', // Reference to the recipient user for transfers (optional)
+    required: false 
   },
   amount: {
     type: Number,
@@ -17,21 +19,21 @@ const transactionSchema = new mongoose.Schema({
   },
   type: {
     type: String,
-    enum: ['credit', 'debit', 'transfer'], // Includes 'transfer' for peer-to-peer payments
+    enum: ['credit', 'debit', 'transfer','income'], 
     required: true,
   },
   category: {
     type: String,
-    enum: ['food', 'rent', 'entertainment', 'utilities', 'transportation', 'other'], // Predefined categories for expenses
     required: true,
-  },
-  date: {
+    default: function() {
+        return this.type === 'income' ? 'income' : undefined;
+    }
+},
+
+date: {
     type: Date,
-    default: Date.now,
-  },
-  description: {
-    type: String,
-  },
+    default: Date.now
+}
 });
 
 module.exports = mongoose.model('Transaction', transactionSchema);
