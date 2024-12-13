@@ -151,7 +151,7 @@ router.post('/login', async (req, res) => {
             ]
         })
             .sort({ date: -1 })  // Most recent first
-            .limit(3)            // Get last 3 transactions
+           
             .select('amount type category date recipient user') // Select fields to display
             .lean();
 
