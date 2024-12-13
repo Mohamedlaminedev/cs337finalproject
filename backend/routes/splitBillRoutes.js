@@ -59,7 +59,7 @@ router.post('/create', validateSplitBillParticipants, async (req, res) => {
                 recipient: userId,
                 amount: splitAmount,
                 type: 'transfer'
-                category,
+                category
             });
             await transaction.save();
 
