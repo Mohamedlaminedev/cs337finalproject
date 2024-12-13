@@ -8,7 +8,7 @@ const { validateSplitBillParticipants } = require('../middleware/splitBillValida
 // Create new split bill
 router.post('/create', validateSplitBillParticipants, async (req, res) => {
     try {
-        const { userId, participants, totalAmount, category, description } = req.body;
+        const { userId, participants, totalAmount, category} = req.body;
         console.log('Starting split bill creation with:', { userId, participants, totalAmount, category });
 
         // Find creator
@@ -58,9 +58,8 @@ router.post('/create', validateSplitBillParticipants, async (req, res) => {
                 user: participant._id,
                 recipient: userId,
                 amount: splitAmount,
-                type: 'transfer',
+                type: 'transfer'
                 category,
-                description: `Split bill for ${description || category}`
             });
             await transaction.save();
 
@@ -76,8 +75,7 @@ router.post('/create', validateSplitBillParticipants, async (req, res) => {
             user: userId,
             amount: splitAmount,
             type: 'debit',
-            category,
-            description: `Your share of split bill for ${description || category}`
+            category
         });
         await creatorTransaction.save();
 
