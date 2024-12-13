@@ -6,7 +6,9 @@ import Dashboard from './pages/Dashboard';
 import TransactionPage from './pages/TransactionPage';
 import HelpPage from './pages/HelpPage';
 import Leaderboard from './pages/Leaderboard';
+import SavingsPage from './pages/Savings';
 import './App.css';
+
 
 function App() {
     const [currentPage, setCurrentPage] = useState('login');
@@ -40,14 +42,14 @@ function App() {
 
     const handleLogin = async (username, initialBalance, isSignup) => {
         try {
-            const response = isSignup
+            const response = isSignup 
                 ? await api.signup(username, initialBalance)
                 : await api.login(username);
 
             if (!response._id) {
                 throw new Error('Invalid response from server');
             }
-
+           
             const newUserData = {
                 _id: response._id,
                 username: response.username,
@@ -55,11 +57,11 @@ function App() {
                 balance: response.balance,
                 transactions: response.transactions || []
             };
-            console.log(newUserData);
+
             updateUserDataAndStorage(newUserData);
             setIsLoggedIn(true);
             setCurrentPage('dashboard');
-
+            
             return response;
         } catch (error) {
             throw new Error('Username not found');
@@ -96,7 +98,7 @@ function App() {
         localStorage.removeItem('userData');
         setIsLoggedIn(false);
         setCurrentPage('login');
-        localStorage.removeItem('dashboardViewMode');
+        localStorage.removeItem('dashboardViewMode'); 
         setUserData({
             username: '',
             budget: 0,
@@ -106,26 +108,102 @@ function App() {
         });
     };
 
+    const handleUpdateSavingsGoal = async (newGoal) => {
+        try {
+            const response = await fetch('http://localhost:5001/api/users/savings/goal', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId: userData._id,
+                    newGoal
+                })
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message);
+
+            updateUserDataAndStorage({
+                ...userData,
+                savingsGoal: data.savingsGoal
+            });
+        } catch (error) {
+            throw new Error('Failed to update savings goal');
+        }
+    };
+
+    const handleAddToSavings = async (amount) => {
+        try {
+            const response = await fetch('http://localhost:5001/api/users/savings/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId: userData._id,
+                    amount
+                })
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message);
+
+            updateUserDataAndStorage({
+                ...userData,
+                balance: data.balance,
+                currentSavings: data.currentSavings,
+                transactions: [data.transaction, ...userData.transactions]
+            });
+        } catch (error) {
+            throw new Error('Failed to add to savings');
+        }
+    };
+
+    const handleWithdrawFromSavings = async (amount) => {
+        try {
+            const response = await fetch('http://localhost:5001/api/users/savings/withdraw', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    userId: userData._id,
+                    amount
+                })
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message);
+
+            updateUserDataAndStorage({
+                ...userData,
+                balance: data.balance,
+                currentSavings: data.currentSavings,
+                transactions: [data.transaction, ...userData.transactions]
+            });
+        } catch (error) {
+            throw new Error('Failed to withdraw from savings');
+        }
+    };
+
     const renderPage = () => {
         const pages = {
             login: <Login onLogin={handleLogin} />,
             leaderboard: <Leaderboard />,
             dashboard: (
                 <Dashboard
-                    userData={{
-                        ...userData,
-                        spendingData: userData.transactions
-                            .filter(t => t.type === 'debit')
-                            .reduce((acc, t) => {
-                                acc[t.category] = (acc[t.category] || 0) + t.amount;
-                                return acc;
-                            }, {})
-                    }}
+                    userData={userData}
+                />
+            ),
+            savings: (
+                <SavingsPage
+                    userData={userData}
+                    onUpdateSavingsGoal={handleUpdateSavingsGoal}
+                    onAddToSavings={handleAddToSavings}
+                    onWithdrawFromSavings={handleWithdrawFromSavings}
                 />
             ),
             transactions: (
                 <TransactionPage
-                    transactions={userData.transactions || []} _id={userData._id}
+                    transactions={userData.transactions}
                     onAddTransaction={handleAddTransaction}
                     currentBalance={userData.balance}
                     userData={userData}
