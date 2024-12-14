@@ -1,0 +1,64 @@
+.navigation {
+    background-color: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 1rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navigation ul {
+    list-style: none;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 2rem;
+    margin: 0;
+    padding: 0;
+}
+
+.navigation li {
+    color: #2c3e50;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.navigation li:hover {
+    color: #007bff;
+    background-color: #f8fafc;
+}
+
+/* Style for the logout button */
+.navigation li:last-child {
+    color: #ef4444;
+}
+
+.navigation li:last-child:hover {
+    color: white;
+    background-color: #ef4444;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .navigation {
+        padding: 0.75rem 1rem;
+    }
+
+    .navigation ul {
+        gap: 1rem;
+    }
+
+    .navigation li {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.8rem;
+    }
+}
+
+/* Optional: Add this if you want to style active navigation item */
+.navigation li.active {
+    color: #007bff;
+    background-color: #eff6ff;
+}
