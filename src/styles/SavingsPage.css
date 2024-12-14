@@ -1,0 +1,120 @@
+
+.savings-container {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.savings-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.savings-title {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 0;
+    color: #1F2937;
+}
+
+.goal-button {
+    padding: 8px 16px;
+    background-color: #3B82F6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.goal-button:hover {
+    background-color: #2563EB;
+}
+
+.error-message {
+    padding: 12px;
+    background-color: #FEE2E2;
+    color: #DC2626;
+    border-radius: 6px;
+    margin-bottom: 16px;
+}
+
+.goal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.input-field {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #D1D5DB;
+    border-radius: 6px;
+    font-size: 16px;
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: #3B82F6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.button-group,
+.transfer-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.save-button,
+.cancel-button,
+.add-button,
+.withdraw-button {
+    flex: 1;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-weight: 500;
+}
+
+.save-button,
+.add-button {
+    background-color: #10B981;
+    color: white;
+}
+
+.save-button:hover,
+.add-button:hover {
+    background-color: #059669;
+}
+
+.cancel-button {
+    background-color: #6B7280;
+    color: white;
+}
+
+.cancel-button:hover {
+    background-color: #4B5563;
+}
+
+.withdraw-button {
+    background-color: #EF4444;
+    color: white;
+}
+
+.withdraw-button:hover {
+    background-color: #DC2626;
+}
+
+.transfer-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
